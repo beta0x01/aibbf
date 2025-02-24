@@ -1,10 +1,10 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify
 from flask_socketio import SocketIO
-import os
+from gevent import pywsgi
 from scan_manager import ScanManager
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="gevent")
 
 scan_manager = ScanManager()
 
@@ -25,4 +25,6 @@ def scan_status(session_id):
     return jsonify(scan_manager.get_status(session_id))
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=8088, debug=True)
+    server = pywsgi.WSGIServer(("0.0.0.0", 8088), app)
+    print("🔥 Server running at http://localhost:8088")
+    server.serve_forever()
