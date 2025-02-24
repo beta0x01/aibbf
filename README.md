@@ -1,6 +1,6 @@
 # AI-Driven Bug Bounty Framework (AIBBF)
 ![AIBBF Banner](res/logo.png)
-## Under Testing ...
+## NOT WORKING, STILL NEED A LOT OF WORK, CONSIDERED AS ((Under Testing)) ...
 The **AI-Driven Bug Bounty Framework (AIBBF)** is a cutting-edge, modular, and professional-grade tool designed for ethical hackers and red-hat teams. It combines the power of artificial intelligence with traditional penetration testing methodologies to provide an unparalleled experience in vulnerability discovery and exploitation.
 
 ---
