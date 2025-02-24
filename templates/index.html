@@ -3,53 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bug Bounty Framework</title>
+    <title>AI Bug Bounty Framework</title>
     <style>
         body { background-color: #121212; color: white; font-family: Arial, sans-serif; text-align: center; }
-        .module { padding: 10px; margin: 5px; border: 1px solid #444; cursor: pointer; }
-        .selected { background-color: #007bff; }
-        #startButton { padding: 10px 20px; background: green; color: white; border: none; cursor: pointer; }
+        h1 { color: #00ffcc; }
+        .container { max-width: 600px; margin: auto; background: #1e1e1e; padding: 20px; border-radius: 10px; box-shadow: 0 0 15px #00ffcc; }
+        input, button { width: 100%; padding: 10px; margin-top: 10px; border-radius: 5px; border: none; }
+        button { background: #00ffcc; color: black; cursor: pointer; font-size: 16px; }
+        .module { padding: 10px; margin: 5px; background: #333; border-radius: 5px; cursor: pointer; }
+        .selected { background-color: #00ffcc; color: black; }
     </style>
 </head>
 <body>
-    <h1>Bug Bounty Framework</h1>
-    <p>Select modules, enter API keys, and start scanning</p>
-    
-    <input type="text" id="domain" placeholder="Enter target domain">
-    <br><br>
-    
-    <h3>API Keys (Optional)</h3>
-    <input type="text" id="shodan_api" placeholder="Shodan API Key"><br><br>
-    <input type="text" id="openai_api" placeholder="OpenAI API Key"><br><br>
-    <input type="text" id="qwen_api" placeholder="Qwen API Key"><br><br>
-    
-    <h3>Modules</h3>
-    <div id="modules">
-        {% for key, value in modules.items() %}
-            <div class="module" onclick="toggleModule('{{ key }}')">{{ value }}</div>
-        {% endfor %}
+    <div class="container">
+        <h1>AI Bug Bounty Framework</h1>
+        <p>Select modules, enter a domain, or upload a file</p>
+        
+        <input type="text" id="domain" placeholder="Enter target domain"><br>
+        <input type="file" id="fileInput"><br>
+        <button onclick="uploadFile()">Upload File</button>
+        
+        <h3>Modules (Click to Select)</h3>
+        <div id="modules">
+            {% for key, value in modules.items() %}
+                <div class="module" onclick="toggleModule('{{ key }}')">{{ value }}</div>
+            {% endfor %}
+        </div>
+        
+        <button id="startButton" onclick="startScan()">Start Scan</button>
+        
+        <h3>Scan Status</h3>
+        <p id="status">Waiting for input...</p>
     </div>
-    <br>
-    
-    <button id="startButton" onclick="startScan()">Start Scan</button>
 
     <script>
         let selectedModules = [];
-        function toggleModule(module) { selectedModules.includes(module) ? selectedModules.splice(selectedModules.indexOf(module), 1) : selectedModules.push(module); }
+        function toggleModule(module) {
+            let index = selectedModules.indexOf(module);
+            if (index > -1) {
+                selectedModules.splice(index, 1);
+            } else {
+                selectedModules.push(module);
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            document.querySelectorAll(".module").forEach(module => {
+                if (selectedModules.includes(module.innerText)) {
+                    module.classList.add("selected");
+                } else {
+                    module.classList.remove("selected");
+                }
+            });
+        }
+
         function startScan() {
-            fetch('/start_scan', { 
-                method: 'POST', 
-                body: JSON.stringify({ 
-                    modules: selectedModules, 
-                    domain: document.getElementById("domain").value,
-                    api_keys: {
-                        shodan: document.getElementById("shodan_api").value,
-                        openai: document.getElementById("openai_api").value,
-                        qwen: document.getElementById("qwen_api").value
-                    }
-                }), 
-                headers: { 'Content-Type': 'application/json' } 
+            let domain = document.getElementById("domain").value;
+            if (!domain) {
+                alert("Please enter a domain or upload a file.");
+                return;
+            }
+
+            fetch('/start_scan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ domain: domain, modules: selectedModules })
             })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("status").innerText = data.status;
+            });
+        }
+
+        function uploadFile() {
+            let fileInput = document.getElementById("fileInput").files[0];
+            if (!fileInput) {
+                alert("Please select a file.");
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("file", fileInput);
+
+            fetch('/upload', { method: 'POST', body: formData })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert("File upload failed: " + data.error);
+                } else {
+                    document.getElementById("domain").value = data.domains.join(", ");
+                }
+            });
         }
     </script>
 </body>
