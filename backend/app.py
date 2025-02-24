@@ -1,43 +1,44 @@
 from flask import Flask, request, jsonify, send_from_directory
 import os
-import uuid
-import json
+import threading
 from .scan_manager import ScanManager
 
 app = Flask(__name__)
 scan_manager = ScanManager()
 
-@app.route("/")
-def home():
-    return send_from_directory("../frontend/templates", "index.html")
+UPLOAD_FOLDER = "uploads"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-@app.route("/api/start_scan", methods=["POST"])
+@app.route("/start_scan", methods=["POST"])
 def start_scan():
-    data = request.json
-    target = data.get("target")
-    modules = data.get("modules", [])
-    scan_id = scan_manager.create_scan(target, modules)
-    return jsonify({"status": "started", "scan_id": scan_id})
+    target = request.form.get("target")
+    modules = request.form.get("modules", "all").split(",")
 
-@app.route("/api/scan_status/<scan_id>")
-def scan_status(scan_id):
-    status = scan_manager.get_status(scan_id)
-    return jsonify(status)
+    if not target:
+        return jsonify({"error": "No target provided"}), 400
 
-@app.route("/api/cancel_scan/<scan_id>", methods=["POST"])
-def cancel_scan(scan_id):
-    scan_manager.cancel_scan(scan_id)
-    return jsonify({"status": "cancelled"})
+    scan_id = scan_manager.start_scan(target, modules)
+    return jsonify({"message": f"Scan started for {target}", "scan_id": scan_id})
 
-@app.route("/api/save_scan/<scan_id>", methods=["POST"])
-def save_scan(scan_id):
-    scan_manager.save_scan(scan_id)
-    return jsonify({"status": "saved"})
+@app.route("/upload", methods=["POST"])
+def upload_file():
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
 
-@app.route("/api/discard_scan/<scan_id>", methods=["POST"])
-def discard_scan(scan_id):
-    scan_manager.discard_scan(scan_id)
-    return jsonify({"status": "discarded"})
+    file = request.files["file"]
+    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+    file.save(filepath)
+
+    scan_id = scan_manager.start_scan(filepath, ["all"])
+    return jsonify({"message": "File uploaded and scan started", "scan_id": scan_id})
+
+@app.route("/get_history", methods=["GET"])
+def get_history():
+    return jsonify(scan_manager.get_scan_history())
+
+@app.route("/results/<scan_id>", methods=["GET"])
+def get_results(scan_id):
+    return send_from_directory("results", f"{scan_id}.json", as_attachment=True)
 
 if __name__ == "__main__":
     app.run(debug=True, port=8088)
