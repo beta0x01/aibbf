@@ -204,7 +204,7 @@ Please ensure your code adheres to our coding standards and includes appropriate
 
 ## License
 
-This project is licensed under the [MIT License](https://github.com/beta0x01/aibbf/LICENSE) . Feel free to use, modify, and distribute AIBBF as per the terms of the license.
+This project is licensed under the [MIT License](LICENSE). Feel free to use, modify, and distribute AIBBF as per the terms of the license.
 
 ---
 
