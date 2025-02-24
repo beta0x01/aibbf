@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, send_from_directory
 import os
 import threading
-from .scan_manager import ScanManager
+from scan_manager import ScanManager
 from flask_socketio import SocketIO
 from websocket_logs import stream_logs
 
