@@ -2,6 +2,11 @@ from flask import Flask, request, jsonify, send_from_directory
 import os
 import threading
 from .scan_manager import ScanManager
+from flask_socketio import SocketIO
+from websocket_logs import stream_logs
+
+socketio = SocketIO(app, cors_allowed_origins="*")
+
 
 app = Flask(__name__)
 scan_manager = ScanManager()
@@ -29,7 +34,9 @@ def upload_file():
     filepath = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(filepath)
 
-    scan_id = scan_manager.start_scan(filepath, ["all"])
+    scan_id = scan_manager.start_scan(target, modules)
+    thread = threading.Thread(target=stream_logs, args=(scan_id,))
+    thread.start()
     return jsonify({"message": "File uploaded and scan started", "scan_id": scan_id})
 
 @app.route("/get_history", methods=["GET"])
