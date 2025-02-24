@@ -1,39 +1,52 @@
-let selectedModules = [];
+$(document).ready(function () {
+    let selectedModules = [];
 
-function toggleModule(module) {
-    if (selectedModules.includes(module)) {
-        selectedModules = selectedModules.filter(m => m !== module);
-    } else {
-        selectedModules.push(module);
-    }
-}
-
-function uploadFile() {
-    let file = document.getElementById("fileUpload").files[0];
-    let formData = new FormData();
-    formData.append("file", file);
-
-    fetch("/api/upload", { method: "POST", body: formData })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById("target").value = data.domains.join(", ");
+    $(".module-btn").click(function () {
+        let module = $(this).data("module");
+        if (module === "all") {
+            selectedModules = ["recon", "web", "cloud", "network", "exploitation"];
+            $(".module-btn").removeClass("btn-outline-primary").addClass("btn-primary");
+        } else {
+            if (selectedModules.includes(module)) {
+                selectedModules = selectedModules.filter(m => m !== module);
+                $(this).removeClass("btn-primary").addClass("btn-outline-primary");
+            } else {
+                selectedModules.push(module);
+                $(this).removeClass("btn-outline-primary").addClass("btn-primary");
+            }
+        }
     });
-}
 
-function startScan() {
-    let target = document.getElementById("target").value;
-    if (!target) {
-        alert("Please enter a target.");
-        return;
-    }
-
-    fetch("/api/start_scan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ target, modules: selectedModules })
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById("status").innerText = "Status: " + data.status;
+    $("#toggle-dark-mode").click(function () {
+        $("body").toggleClass("dark-mode");
     });
-}
+
+    $("#start-scan").click(function () {
+        let target = $("#target").val();
+        if (!target) {
+            alert("Please enter a target domain!");
+            return;
+        }
+
+        $.post("/start_scan", { target: target, modules: selectedModules.join(",") }, function (data) {
+            $("#status").html(`<span class="alert alert-success">Scan started for ${target}</span>`);
+            loadScanHistory();
+        });
+    });
+
+    function loadScanHistory() {
+        $.get("/get_history", function (data) {
+            $("#scan-history").html("");
+            data.forEach(scan => {
+                $("#scan-history").append(
+                    `<tr>
+                        <td>${scan.target}</td>
+                        <td>${scan.modules}</td>
+                        <td>${scan.status}</td>
+                        <td><a href="${scan.result}" target="_blank">Download</a></td>
+                    </tr>`
+                );
+            });
+        });
+    }
+});
