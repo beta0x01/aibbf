@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Bounty Framework</title>
+    <style>
+        body { background-color: #121212; color: white; font-family: Arial, sans-serif; text-align: center; }
+        .module { padding: 10px; margin: 5px; border: 1px solid #444; cursor: pointer; }
+        .selected { background-color: #007bff; }
+        #startButton { padding: 10px 20px; background: green; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Bug Bounty Framework</h1>
+    <p>Select modules, enter API keys, and start scanning</p>
+    
+    <input type="text" id="domain" placeholder="Enter target domain">
+    <br><br>
+    
+    <h3>API Keys (Optional)</h3>
+    <input type="text" id="shodan_api" placeholder="Shodan API Key"><br><br>
+    <input type="text" id="openai_api" placeholder="OpenAI API Key"><br><br>
+    <input type="text" id="qwen_api" placeholder="Qwen API Key"><br><br>
+    
+    <h3>Modules</h3>
+    <div id="modules">
+        {% for key, value in modules.items() %}
+            <div class="module" onclick="toggleModule('{{ key }}')">{{ value }}</div>
+        {% endfor %}
+    </div>
+    <br>
+    
+    <button id="startButton" onclick="startScan()">Start Scan</button>
+
+    <script>
+        let selectedModules = [];
+        function toggleModule(module) { selectedModules.includes(module) ? selectedModules.splice(selectedModules.indexOf(module), 1) : selectedModules.push(module); }
+        function startScan() {
+            fetch('/start_scan', { 
+                method: 'POST', 
+                body: JSON.stringify({ 
+                    modules: selectedModules, 
+                    domain: document.getElementById("domain").value,
+                    api_keys: {
+                        shodan: document.getElementById("shodan_api").value,
+                        openai: document.getElementById("openai_api").value,
+                        qwen: document.getElementById("qwen_api").value
+                    }
+                }), 
+                headers: { 'Content-Type': 'application/json' } 
+            })
+        }
+    </script>
+</body>
+</html>
