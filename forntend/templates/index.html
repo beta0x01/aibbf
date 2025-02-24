@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Bounty Framework</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+    <div id="app">
+        <h1>Bug Bounty Framework</h1>
+        <input type="text" id="target" placeholder="Enter Target">
+        <input type="file" id="fileUpload">
+        <button onclick="uploadFile()">Upload File</button>
+
+        <h3>Select Modules:</h3>
+        <div id="modules">
+            <button class="module-btn" onclick="toggleModule('all')">All</button>
+            <button class="module-btn" onclick="toggleModule('recon')">Recon</button>
+            <button class="module-btn" onclick="toggleModule('web')">Web</button>
+            <button class="module-btn" onclick="toggleModule('cloud')">Cloud</button>
+            <button class="module-btn" onclick="toggleModule('network')">Network</button>
+            <button class="module-btn" onclick="toggleModule('exploitation')">Exploitation</button>
+        </div>
+
+        <button onclick="startScan()">Start Scan</button>
+        <h2 id="status">Status: Waiting...</h2>
+    </div>
+
+    <script src="../static/script.js"></script>
+</body>
+</html>
