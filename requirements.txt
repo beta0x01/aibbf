@@ -1,6 +1,6 @@
 flask
-requests
-beautifulsoup4
+flask-socketio
 openai
-dashscope
-telebot
+requests
+bcrypt
+pyjwt
