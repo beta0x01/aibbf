@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, send_from_directory
 import os
 import uuid
 import json
-from scan_manager import ScanManager
+from scan_manager.py import ScanManager
 
 app = Flask(__name__)
 scan_manager = ScanManager()
