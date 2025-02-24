@@ -1,8 +1,8 @@
 import os
 import argparse
 import threading
-from backend/app.py import app
-from backend/scan_manager.py import ScanManager
+from backend.app import app
+from backend.scan_manager import ScanManager
 
 def start_web_ui(port):
     """Starts the Flask Web UI"""
