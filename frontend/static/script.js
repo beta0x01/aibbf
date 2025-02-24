@@ -1,4 +1,30 @@
 $(document).ready(function () {
+    let socket = io.connect("http://localhost:8088");
+
+    socket.on("scan_update", function (data) {
+        $("#status").append(`<div class="alert alert-warning">${data.message}</div>`);
+    });
+
+    socket.on("scan_complete", function (data) {
+        $("#status").append(`<div class="alert alert-success">${data.message}</div>`);
+        loadScanHistory();
+    });
+
+    function loadScanHistory() {
+        $.get("/get_history", function (data) {
+            $("#scan-history").html("");
+            data.forEach(scan => {
+                $("#scan-history").append(
+                    `<tr>
+                        <td>${scan.target}</td>
+                        <td>${scan.modules}</td>
+                        <td>${scan.status}</td>
+                        <td><a href="${scan.result}" target="_blank">Download</a></td>
+                    </tr>`
+                );
+            });
+        });
+    });
     let selectedModules = [];
 
     $(".module-btn").click(function () {
