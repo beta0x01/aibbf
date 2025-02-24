@@ -5,12 +5,10 @@ from .scan_manager import ScanManager
 from flask_socketio import SocketIO
 from websocket_logs import stream_logs
 
-socketio = SocketIO(app, cors_allowed_origins="*")
-
-
 app = Flask(__name__)
 scan_manager = ScanManager()
 
+socketio = SocketIO(app, cors_allowed_origins="*")
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
